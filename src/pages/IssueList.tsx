@@ -1,30 +1,57 @@
-import React, { useEffect, useState } from 'react';
-import { getIssues, listReposIssueResponse } from '../apis/issues';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { getIssuesApi, listReposIssueResponse } from '../apis/issues';
 import { Link } from 'react-router-dom';
 
 export default function IssueList() {
-  // assuming `issues` is the data you fetched
+  const obsRef = useRef(null);
   const [issues, setIssues] = useState<listReposIssueResponse['data']>([]);
+  const [page, setPage] = useState(0);
+  const [loading, setLoading] = useState(false);
+
+  const obsHandler = (entries: IntersectionObserverEntry[]) => {
+    // 옵저버 콜백함수
+    const target = entries[0];
+
+    if (target.isIntersecting) {
+      setPage((prev) => prev + 1);
+    }
+  };
+
+  const getIssues = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await getIssuesApi(page);
+      setIssues((prev) => [...prev, ...response]);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  }, [page]);
 
   useEffect(() => {
-    (async () => {
-      const response = await getIssues(0);
-      console.log('response :>> ', response);
-      // getEx();
-      setIssues(response);
-    })();
+    const observer = new IntersectionObserver(obsHandler, { threshold: 0.4 });
+
+    if (obsRef.current) observer.observe(obsRef.current);
+    return () => {
+      observer.disconnect();
+    };
   }, []);
+
+  useEffect(() => {
+    getIssues();
+  }, [page]);
 
   return (
     <div className='max-w-xl m-auto'>
       <p>이슈리스트</p>
-      <div className='divide-y divide-solid'>
+      <ul className='divide-y divide-solid'>
         {issues?.map((issue, index) => (
           <>
-            <div key={issue.id}>
+            <li key={issue.id}>
               <Link
                 to={`/issue/${issue.id}`}
-                className='flex justify-between items-center	 hover:bg-slate-300  p-3'
+                className='flex justify-between items-center hover:bg-slate-300  p-3'
               >
                 <div>
                   <h2 className='text-base'>{`#${issue.number} ${issue.title}`}</h2>
@@ -37,7 +64,7 @@ export default function IssueList() {
                 {/* 프로필이미지: issue.user.avatar_url
                     본문: issue.body */}
               </Link>
-            </div>
+            </li>
             {index % 5 === 4 && (
               <Link to='https://www.wanted.co.kr/'>
                 <img
@@ -49,7 +76,9 @@ export default function IssueList() {
             )}
           </>
         ))}
-      </div>
+        {loading && <div className='spinner'>로딩 중..</div>}
+        <li ref={obsRef}></li>
+      </ul>
     </div>
   );
 }

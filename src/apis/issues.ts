@@ -13,7 +13,7 @@ const octokit = new Octokit({
 export type listReposIssueResponse =
   Endpoints['GET /repos/{owner}/{repo}/issues']['response'];
 
-export const getIssues = async (
+export const getIssuesApi = async (
   page: number,
 ): Promise<listReposIssueResponse['data']> => {
   const res = await octokit.request('GET /repos/{owner}/{repo}/issues', {
@@ -24,28 +24,9 @@ export const getIssues = async (
     },
     sort: 'comments',
     page,
-    per_page: 10,
+    per_page: 20,
   });
 
   console.log('res :>> ', res.data);
   return res.data;
 };
-
-export const getEx = async () => {
-  await octokit.request('GET /orgs/{org}/issues', {
-    org: 'seat-checking',
-    headers: {
-      'X-GitHub-Api-Version': '2022-11-28',
-    },
-  });
-};
-
-// const getIssues = async () => {
-//     return await octokit.request("GET /repos/{owner}/{repo}/issues", {
-//         owner: "OWNER",
-//         repo: "REPO",
-//         headers: {
-//             "X-GitHub-Api-Version": "2022-11-28",
-//         },
-//     });
-// };
