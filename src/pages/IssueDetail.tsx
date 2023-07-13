@@ -7,7 +7,13 @@ export default function IssueDetail() {
   const { getIssue } = useContext(IssueContext);
   const { id } = useParams();
 
-  const issue = getIssue(Number(id));
+  let issue;
+
+  try {
+    issue = getIssue(Number(id));
+  } catch (error) {
+    return <div>에러 화면</div>;
+  }
 
   return (
     <div className='max-w-xl m-auto'>
@@ -15,7 +21,7 @@ export default function IssueDetail() {
         <div className='w-14 h-14 rounded-lg overflow-hidden mr-4'>
           <img
             className='w-full h-full object-cover'
-            src={issue.user.avatar_url}
+            src={issue.user?.avatar_url}
             alt='깃헙 프로필 이미지'
           />
         </div>
@@ -29,7 +35,7 @@ export default function IssueDetail() {
         <p>{`코멘트: ${issue.comments}`}</p>
       </h2>
       <div className='p-3'>
-        <MarkdownPreview source={issue.body} />
+        <MarkdownPreview source={issue.body || ''} />
       </div>
     </div>
   );

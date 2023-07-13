@@ -3,17 +3,29 @@ import { getIssuesApi, listReposIssueResponse } from '../apis/issues';
 
 interface IssueContextType {
   issues: listReposIssueResponse['data'];
-  getIssues: (page: number) => void;
   isLoading: boolean;
+  getIssues: (page: number) => void;
+  getIssue: (id: number) => listReposIssueResponse['data'][number];
 }
 
-interface IssueContextProvider {
+const defaultVlaue: IssueContextType = {
+  issues: [],
+  isLoading: false,
+  getIssues: () => {
+    throw new Error();
+  },
+  getIssue: () => {
+    throw new Error();
+  },
+};
+
+interface IssueContextProviderProps {
   children: React.ReactNode;
 }
 
-export const IssueContext = createContext<any | undefined>(undefined); // TODO context 타입 지정 필요
+export const IssueContext = createContext<IssueContextType>(defaultVlaue);
 
-export function IssueContextProvider({ children }: IssueContextProvider) {
+export function IssueContextProvider({ children }: IssueContextProviderProps) {
   const [issues, setIssues] = useState<listReposIssueResponse['data']>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -29,7 +41,13 @@ export function IssueContextProvider({ children }: IssueContextProvider) {
     }
   };
 
-  const getIssue = (id: number) => issues.find((issue) => issue.id === id);
+  const getIssue = (id: number) => {
+    const issue = issues.find((issue) => issue.id === id);
+    if (!issue) {
+      throw new Error('id에 해당하는 issue가 없습니다 ');
+    }
+    return issue;
+  };
 
   return (
     <IssueContext.Provider value={{ issues, isLoading, getIssues, getIssue }}>
