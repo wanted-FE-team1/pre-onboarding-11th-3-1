@@ -1,31 +1,46 @@
-import { Octokit } from '@octokit/core';
+import axios, { AxiosResponse } from 'axios';
 import { Endpoints } from '@octokit/types';
 
-const TOKEN = process.env.REACT_APP_ACCESS_TOKEN;
+const ACCESS_TOKEN = process.env.REACT_APP_ACCESS_TOKEN;
+const OWNER = 'facebook';
+const REPO = 'react';
 
-const owner = 'facebook';
-const repo = 'react';
+export type issueListResponseType =
+  Endpoints['GET /repos/{owner}/{repo}/issues']['response'];
+export type issueResponseType =
+  Endpoints['GET /repos/{owner}/{repo}/issues/{issue_number}']['response'];
+export type issueListDataType = issueListResponseType['data'];
+export type issueDataType = issueResponseType['data'];
+type sortType = 'created' | 'updated' | 'comments';
 
-const octokit = new Octokit({
-  auth: TOKEN,
+const axiosInstance = axios.create({
+  baseURL: 'https://api.github.com',
+  headers: {
+    Accept: 'application/vnd.github+json',
+    Authorization: `Bearer ${ACCESS_TOKEN}`,
+  },
 });
 
-export type listReposIssueResponse =
-  Endpoints['GET /repos/{owner}/{repo}/issues']['response'];
+export class RepositoryAPI {
+  private static PATH_ISSUES = `/repos/${OWNER}/${REPO}/issues`;
+  private static QUERY_SORT_TYPE: sortType = 'comments';
+  private static QUERY_PER_PAGE = '15';
 
-export const getIssuesApi = async (
-  page: number,
-): Promise<listReposIssueResponse['data']> => {
-  const res = await octokit.request('GET /repos/{owner}/{repo}/issues', {
-    owner,
-    repo,
-    headers: {
-      'X-GitHub-Api-Version': '2022-11-28', // latest
-    },
-    sort: 'comments',
-    page,
-    per_page: 10,
-  });
+  static async getIssueList(page: number): Promise<issueListDataType> {
+    const URI = `${this.PATH_ISSUES}?sort=${this.QUERY_SORT_TYPE}&per_page=${this.QUERY_PER_PAGE}&page=${page}`;
 
-  return res.data;
-};
+    const result: AxiosResponse<issueListDataType> = await axiosInstance.get(
+      URI,
+    );
+
+    return result.data;
+  }
+
+  static async getIssue(issueId: string): Promise<issueDataType> {
+    const response: AxiosResponse<issueDataType> = await axiosInstance.get(
+      `${this.PATH_ISSUES}/${issueId}`,
+    );
+
+    return response.data;
+  }
+}
