@@ -1,12 +1,18 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { getIssuesApi, listReposIssueResponse } from '../apis/issues';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
+import { getIssuesApi } from '../apis/issues';
 import { Link } from 'react-router-dom';
+import { IssueContext } from '../contexts/IC';
 
 export default function IssueList() {
+  const { issues, getIssues, loading } = useContext(IssueContext);
   const obsRef = useRef(null);
-  const [issues, setIssues] = useState<listReposIssueResponse['data']>([]);
   const [page, setPage] = useState(0);
-  const [loading, setLoading] = useState(false);
 
   const obsHandler = (entries: IntersectionObserverEntry[]) => {
     // 옵저버 콜백함수
@@ -16,18 +22,6 @@ export default function IssueList() {
       setPage((prev) => prev + 1);
     }
   };
-
-  const getIssues = useCallback(async () => {
-    setLoading(true);
-    try {
-      const response = await getIssuesApi(page);
-      setIssues((prev) => [...prev, ...response]);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  }, [page]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(obsHandler, { threshold: 0.4 });
@@ -39,16 +33,18 @@ export default function IssueList() {
   }, []);
 
   useEffect(() => {
-    getIssues();
+    getIssues(page);
   }, [page]);
+
+  console.log('issues :>> ', issues);
 
   return (
     <div className='max-w-xl m-auto'>
       <p>이슈리스트</p>
       <ul className='divide-y divide-solid'>
-        {issues?.map((issue, index) => (
-          <>
-            <li key={issue.id}>
+        {issues?.map((issue: any, index: any) => (
+          <div key={issue.id}>
+            <li>
               <Link
                 to={`/issue/${issue.id}`}
                 className='flex justify-between items-center hover:bg-slate-300  p-3'
@@ -74,7 +70,7 @@ export default function IssueList() {
                 />
               </Link>
             )}
-          </>
+          </div>
         ))}
         {loading && <div className='spinner'>로딩 중..</div>}
         <li ref={obsRef}></li>

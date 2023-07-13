@@ -24,9 +24,8 @@ export const getIssuesApi = async (
     },
     sort: 'comments',
     page,
-    per_page: 20,
+    per_page: 10,
   });
 
-  console.log('res :>> ', res.data);
   return res.data;
 };
