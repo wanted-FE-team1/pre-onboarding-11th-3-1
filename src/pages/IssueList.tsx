@@ -1,13 +1,6 @@
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
-import { getIssuesApi } from '../apis/issues';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { IssueContext } from '../contexts/IC';
+import { IssueContext } from '../contexts/IssueContext';
 
 export default function IssueList() {
   const { issues, getIssues, loading } = useContext(IssueContext);

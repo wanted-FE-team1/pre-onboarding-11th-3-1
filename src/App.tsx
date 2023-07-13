@@ -1,6 +1,6 @@
 import { RouterProvider } from 'react-router-dom';
 import { router } from './router/Router';
-import { IssueContextProvider } from './contexts/IC';
+import { IssueContextProvider } from './contexts/IssueContext';
 
 function App() {
   return (

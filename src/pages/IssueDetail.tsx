@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { useParams } from 'react-router-dom';
-import { IssueContext } from '../contexts/IC';
+import { IssueContext } from '../contexts/IssueContext';
 import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
 import remarkGfm from 'remark-gfm';
 
