@@ -19,7 +19,7 @@ export default function IssueList() {
     <div className='max-w-xl m-auto'>
       <ul>
         {issues?.map((issue, index) => (
-          <div key={issue.id}>
+          <div key={issue.id + index}>
             <li className='border-solid border-b-2 border-gray-200 '>
               <Link
                 to={`/issue/${issue.id}`}
