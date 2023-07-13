@@ -1,8 +1,7 @@
 import React, { useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import { IssueContext } from '../contexts/IssueContext';
-import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
-import remarkGfm from 'remark-gfm';
+import MarkdownPreview from '@uiw/react-markdown-preview';
 
 export default function IssueDetail() {
   const { getIssue } = useContext(IssueContext);
@@ -28,11 +27,9 @@ export default function IssueDetail() {
           </p>
         </div>
         <p>{`코멘트: ${issue.comments}`}</p>
-        {/* 프로필이미지: issue.user.avatar_url
-                    본문: issue.body */}
       </h2>
       <div className='p-3'>
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>{issue.body}</ReactMarkdown>
+        <MarkdownPreview source={issue.body} />
       </div>
     </div>
   );
