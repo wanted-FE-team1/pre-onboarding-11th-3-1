@@ -1,7 +1,7 @@
 import { Octokit } from '@octokit/core';
 import { Endpoints } from '@octokit/types';
 
-const TOKEN = process.env.REACT_APP_OCTOKIT_TOKEN;
+const TOKEN = process.env.REACT_APP_ACCESS_TOKEN;
 
 const owner = 'facebook';
 const repo = 'react';
