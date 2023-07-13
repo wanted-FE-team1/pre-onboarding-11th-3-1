@@ -1,17 +1,19 @@
-import React, { createContext, useState } from 'react';
+import React, { createContext, useRef, useState } from 'react';
 import { getIssuesApi, listReposIssueResponse } from '../apis/issues';
 
 interface IssueContextType {
   issues: listReposIssueResponse['data'];
   isLoading: boolean;
-  getIssues: (page: number) => void;
+  isError: boolean;
+  getInfiniteIssues: () => void;
   getIssue: (id: number) => listReposIssueResponse['data'][number];
 }
 
 const defaultVlaue: IssueContextType = {
   issues: [],
   isLoading: false,
-  getIssues: () => {
+  isError: false,
+  getInfiniteIssues: () => {
     throw new Error();
   },
   getIssue: () => {
@@ -28,14 +30,28 @@ export const IssueContext = createContext<IssueContextType>(defaultVlaue);
 export function IssueContextProvider({ children }: IssueContextProviderProps) {
   const [issues, setIssues] = useState<listReposIssueResponse['data']>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
 
-  const getIssues = async (page: number) => {
+  const pageRef = useRef(1);
+  const isEndRef = useRef(false);
+
+  const getInfiniteIssues = async () => {
+    if (isEndRef.current) return;
+
     setIsLoading(true);
+
     try {
-      const response = await getIssuesApi(page);
+      const response = await getIssuesApi(pageRef.current);
+
+      if (response.length === 0) {
+        isEndRef.current = true;
+        return;
+      }
+
+      pageRef.current = pageRef.current + 1;
       setIssues((prev) => [...prev, ...response]);
     } catch (error) {
-      console.error(error);
+      setIsError(true);
     } finally {
       setIsLoading(false);
     }
@@ -50,7 +66,9 @@ export function IssueContextProvider({ children }: IssueContextProviderProps) {
   };
 
   return (
-    <IssueContext.Provider value={{ issues, isLoading, getIssues, getIssue }}>
+    <IssueContext.Provider
+      value={{ issues, isLoading, getInfiniteIssues, getIssue, isError }}
+    >
       {children}
     </IssueContext.Provider>
   );

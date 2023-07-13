@@ -2,33 +2,21 @@ import { useContext, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { IssueContext } from '../contexts/IssueContext';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import { useIntersectionObserver } from '../hooks/useIntersectionObserver';
 
 export default function IssueList() {
-  const { issues, getIssues, isLoading } = useContext(IssueContext);
-  const obsRef = useRef(null);
-  const [page, setPage] = useState(0);
+  const { issues, getInfiniteIssues, isLoading, isError } =
+    useContext(IssueContext);
 
-  const obsHandler = (entries: IntersectionObserverEntry[]) => {
-    // 옵저버 콜백함수
-    const target = entries[0];
-
-    if (target.isIntersecting) {
-      setPage((prev) => prev + 1);
+  const handleIntersection = () => {
+    if (!isLoading) {
+      getInfiniteIssues();
     }
   };
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(obsHandler, { threshold: 0.4 });
+  const ref = useIntersectionObserver({ callback: handleIntersection });
 
-    if (obsRef.current) observer.observe(obsRef.current);
-    return () => {
-      observer.disconnect();
-    };
-  }, []);
-
-  useEffect(() => {
-    getIssues(page);
-  }, [page]);
+  if (isError) return <div>에러</div>;
 
   return (
     <div className='max-w-xl m-auto'>
@@ -62,7 +50,7 @@ export default function IssueList() {
           </div>
         ))}
         {isLoading && <LoadingSpinner />}
-        <li ref={obsRef}></li>
+        <li ref={ref}></li>
       </ul>
     </div>
   );
