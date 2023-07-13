@@ -3,8 +3,10 @@ import { Endpoints } from '@octokit/types';
 
 const TOKEN = process.env.REACT_APP_ACCESS_TOKEN;
 
-const owner = 'facebook';
-const repo = 'react';
+// const owner = 'facebook';
+// const repo = 'react';
+const owner = 'wanted-FE-tea';
+const repo = 'pre-onboarding-11th-3-1';
 
 const octokit = new Octokit({
   auth: TOKEN,
