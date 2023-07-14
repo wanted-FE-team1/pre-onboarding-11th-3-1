@@ -185,3 +185,21 @@ $ npm start
     ```
 
 <br/>
+
+
+#### 📌 context API 활용하여 Issue 목록 관리
+
+[고민 사항]
+
+**이슈들을 무한으로 불러오기 위한 page 변수를 어디서 관리할지에 대한 고민**
+
+1. Issue Context를 사용하는 컴포넌트 단(`IssueList` 페이지)에서 관리
+2. Issue Context에서 관리
+
+- 논의 결과: Issue Context에서 관리
+- 이유: page 변수는 오로지 이슈를 위해서만 존재하기 때문에, issue를 관리하는 IssueContext 에서 관리하는 게 적합하다고 판단
+
+[그 외 개선 사항]
+
+1. 이슈를 불러올 때 사용하는 page 변수는 state 대신 useRef 사용하여 불필요한 리랜더링 방지
+2. `isEndRef` 를 사용하여 더 이상 불러올 데이터가 없으면 api를 호출하지 않도록 막음
