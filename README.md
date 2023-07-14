@@ -137,10 +137,51 @@ $ npm start
 ### 구현사항 
 ---
 <!-- 구현 사항 설명 --> 
-#### 📌 여기에 구현 사항 제목을 작성해 주세요 
-- 설명
-- 설명 
+#### 📌 IssueList 컴포넌트
+1. 관심사를 분리하여 컴포넌트의 가독성과 유지 보수성을 향상
+- 이슈 데이터 및 상태 관리는 IssueContext로 분리되어 관심사 분리 
+- 무한 스크롤 기능과 관련된 로직을 useIntersectionObserver 훅을 통해 별도로 분리
+
+    ```tsx
+    // src/pages/IssueList.tsx
+    const { issues, getInfiniteIssues, isLoading, isError } = useContext(IssueContext);
+    const handleIntersection = () => {
+      if (!isLoading) getInfiniteIssues();
+    };
+    const ref = useIntersectionObserver({ callback: handleIntersection });
+    ```
+
+2. 에러 처리 : 리다이렉션 vs 에러 컴포넌트
+- 에러가 발생한 컴포넌트만 영향을 받고, 다른 서비스나 기능은 정상적으로 동작할 수 있음 
+- 전체 애플리케이션의 안정성을 유지하면서 문제가 발생한 부분만 처리할 수 있음
+
+    ```tsx
+    {
+      isError ? <Error /> : <li ref={ref}></li>
+    }
+    ```
+
+    <br/>
+
+#### 📌 useIntersectionObserver 커스텀 훅
+- Intersection Observer를 사용하여 요소의 가시성 변경을 감지하고, 지정된 콜백 함수를 호출하는 역할
+- 코드의 가독성이 향상. Intersection Observer의 로직이 분리되어 더욱 명확하게 이해할 수 있음
+- 재사용성이 높아짐. useIntersectionObserver 훅을 다른 컴포넌트에서도 활용하여 가시성 변경 이벤트를 처리할 수 있음
+
+    ```tsx
+    const useIntersectionObserver = ({ callback, option = {} }) => {
+      const ref = useRef(null);
+      const handleIntersection = (entries) => {
+        const target = entries[0];
+        if (target.isIntersecting) callback();
+      };
+      useEffect(() => {
+        const observer = new IntersectionObserver(handleIntersection, { threshold: 0.5, ...option });
+        if (ref.current) observer.observe(ref.current);
+        return () => observer.disconnect();
+      }, [handleIntersection]);
+      return ref;
+    };
+    ```
 
 <br/>
-
-
