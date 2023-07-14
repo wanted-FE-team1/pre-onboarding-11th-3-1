@@ -139,8 +139,8 @@ $ npm start
 <!-- 구현 사항 설명 --> 
 #### 📌 IssueList 컴포넌트
 1. 관심사를 분리하여 컴포넌트의 가독성과 유지 보수성을 향상
-- 이슈 데이터 및 상태 관리는 IssueContext로 분리되어 관심사 분리 
-- 무한 스크롤 기능과 관련된 로직을 useIntersectionObserver 훅을 통해 별도로 분리
+- 무한 스크롤 로직, 이슈 데이터 및 상태 관리는 IssueContext로 분리되어 관심사 분리 
+- Intersection Observer과 관련된 로직을 useIntersectionObserver 훅을 통해 별도로 분리
 
     ```tsx
     // src/pages/IssueList.tsx
