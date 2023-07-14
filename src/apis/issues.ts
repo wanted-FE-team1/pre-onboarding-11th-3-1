@@ -27,10 +27,15 @@ export class RepositoryAPI {
   private static QUERY_PER_PAGE = '15';
 
   static async getIssueList(page: number): Promise<IssueListDataType> {
-    const URI = `${this.PATH_ISSUES}?sort=${this.QUERY_SORT_TYPE}&per_page=${this.QUERY_PER_PAGE}&page=${page}`;
-
     const result: AxiosResponse<IssueListDataType> = await axiosInstance.get(
-      URI,
+      this.PATH_ISSUES,
+      {
+        params: {
+          sort: this.QUERY_SORT_TYPE,
+          per_page: this.QUERY_PER_PAGE,
+          page: page,
+        },
+      },
     );
 
     return result.data;
