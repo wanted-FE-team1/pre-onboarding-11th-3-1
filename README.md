@@ -58,10 +58,18 @@
 
 ## ⚙️ 실행 방법
 
+**설치 및 실행**
 ```
 $ npm install
 $ npm start
 ```
+
+**환경변수** <br/>
+루트 경로에 .env.local 파일 생성 후 아래 코드 추가 
+```env
+REACT_APP_ACCESS_TOKEN={깃허브 토큰}
+```
+
 <br/>
 
 ## 🤝 팀 규칙 
