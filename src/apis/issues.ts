@@ -1,7 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 import { Endpoints } from '@octokit/types';
 
-const ACCESS_TOKEN = process.env.REACT_APP_ACCESS_TOKEN;
 const OWNER = 'facebook';
 const REPO = 'react';
 
@@ -17,8 +16,14 @@ const axiosInstance = axios.create({
   baseURL: 'https://api.github.com',
   headers: {
     Accept: 'application/vnd.github+json',
-    Authorization: `Bearer ${ACCESS_TOKEN}`,
   },
+});
+
+axiosInstance.interceptors.request.use((request) => {
+  const ACCESS_TOKEN = process.env.REACT_APP_ACCESS_TOKEN;
+  if (ACCESS_TOKEN) request.headers['Authorization'] = `Bearer ${ACCESS_TOKEN}`;
+  if (!ACCESS_TOKEN) request.headers['Authorization'] = '';
+  return request;
 });
 
 export class RepositoryAPI {
