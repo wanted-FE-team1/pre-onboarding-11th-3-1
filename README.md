@@ -334,9 +334,9 @@ export default function Header() {
 #### 📌 IssueDetail 컴포넌트: API 요청 처리 방법 선택
 
 1. 논의 사항
-   - IssueContext에서 모든 issue(전체 list, 개별 list)를 관리하되 로딩, 에러 상태는 관리 안함
-   - IssueContext에서는 issue 무한스크롤로 불러오는 것만 담당, 그에 따른 로딩 & 에러 상태도 같이 관리
+   - IssueContext에서 모든 이슈를 관리하되 로딩, 에러 상태는 관리 안함
+   - IssueContext에서는 이슈 무한스크롤로 불러오는 것만 담당, 그에 따른 로딩 & 에러 상태도 같이 관리
 2. 논의 결과
-   - IssueContext에서 모든 issue를 관리하게 되면 로딩, 에러 상태 공유해서 쓰게 되기 때문에 IssueContext를 사용하는 컴포넌트 단에서 로딩, 에러 상태 변수를 만들어야 해서 개별 issue api 호출은 IssueDetail에서 직접하는게 적합
+   - IssueContext에서 모든 이슈를 관리하게 되면 로딩, 에러 상태 공유해서 쓰게 되기 때문에 IssueContext를 사용하는 컴포넌트 단에서 로딩, 에러 상태 변수를 만들어야 해서 개별 이슈 api 호출은 IssueDetail에서 직접하는게 적합
 3. 해결 방법
    - 개별 이슈 api호출은 IssueContext가 아닌 IssueDetail에서 진행
