@@ -61,9 +61,18 @@
 
 ## ⚙️ 실행 방법
 
+**설치 및 실행**
+
 ```
 $ npm install
 $ npm start
+```
+
+**환경변수** <br/>
+루트 경로에 .env.local 파일 생성 후 아래 코드 추가
+
+```env
+REACT_APP_ACCESS_TOKEN={깃허브 토큰}
 ```
 
 <br/>
@@ -90,10 +99,11 @@ $ npm start
   ├── 📄index.tsx
   ├── 📄App.tsx
   ├── 📂apis
-  ├── 📂contxts
+  ├── 📂contexts
   ├── 📂components
   ├── 📂hooks
   ├── 📂pages
+  ├── 📂utils
   └── 📂router
 ```
 
@@ -106,6 +116,8 @@ $ npm start
 <br/>
 
 ## 📖 서비스 소개
+
+특정 깃허브 레파지토리의 이슈 목록과 상세 내용을 조회할 수 있는 웹 사이트 구축
 
 ### 기능 구현
 
@@ -158,9 +170,174 @@ $ npm start
 
 <!-- 구현 사항 설명 -->
 
-#### 📌 여기에 구현 사항 제목을 작성해 주세요
+#### 📌 API
 
-- 설명
-- 설명
+**axios instance**
+
+- baseURL 지정
+- header에 모든 요청 시 공통으로 들어가는 Accept, Authorization(토큰) 지정
+
+**특정 저장소의 이슈 데이터를 요청하는 api class**
+
+- private 키워드: path, query의 외부 접근을 막기위해 private 키워드 설정
+- getIssueList: 이슈 목록을 요청하는 메소드
+- getIssue: 단일 이슈를 요청하는 메소드
+
+**sort type**
+
+- 기존 코드는 sort 옵션 중 하나인 `comments`를 `QUERY_SORT_TYPE`에 할당해서 사용하고 있음
+- sort 옵션은 `created`, `updated`, `comments` 총 3가지가 있는데, 이 외에 다른 문자열이 할당되면 오류가 발생할 수 있음. 그래서 기존의 string 타입보다 더 구체적인 리터럴 타입을 지정해 오류를 방지함
+
+```ts
+type SortType = 'created' | 'updated' | 'comments';
+
+export class RepositoryAPI {
+  private static QUERY_SORT_TYPE: SortType = 'comments';
+
+  // code...
+}
+```
+
+<br/>
+
+#### 📌 IssueList 컴포넌트
+
+1. 관심사를 분리하여 컴포넌트의 가독성과 유지 보수성을 향상
+
+- 무한 스크롤 로직, 이슈 데이터 및 상태 관리는 IssueContext로 분리되어 관심사 분리
+- Intersection Observer과 관련된 로직을 useIntersectionObserver 훅을 통해 별도로 분리
+
+  ```tsx
+  // src/pages/IssueList.tsx
+  const { issues, getInfiniteIssues, isLoading, isError } =
+    useContext(IssueContext);
+  const handleIntersection = () => {
+    if (!isLoading) getInfiniteIssues();
+  };
+  const ref = useIntersectionObserver({ callback: handleIntersection });
+  ```
+
+2. 에러 처리 : 리다이렉션 vs 에러 컴포넌트
+
+- 에러가 발생한 컴포넌트만 영향을 받고, 다른 서비스나 기능은 정상적으로 동작할 수 있음
+- 전체 애플리케이션의 안정성을 유지하면서 문제가 발생한 부분만 처리할 수 있음
+
+  ```tsx
+  {
+    isError ? <Error /> : <li ref={ref}></li>;
+  }
+  ```
+
+    <br/>
+
+#### 📌 useIntersectionObserver 커스텀 훅
+
+- Intersection Observer를 사용하여 요소의 가시성 변경을 감지하고, 지정된 콜백 함수를 호출하는 역할
+- 코드의 가독성이 향상. Intersection Observer의 로직이 분리되어 더욱 명확하게 이해할 수 있음
+- 재사용성이 높아짐. useIntersectionObserver 훅을 다른 컴포넌트에서도 활용하여 가시성 변경 이벤트를 처리할 수 있음
+
+  ```tsx
+  const useIntersectionObserver = ({ callback, option = {} }) => {
+    const ref = useRef(null);
+    const handleIntersection = (entries) => {
+      const target = entries[0];
+      if (target.isIntersecting) callback();
+    };
+    useEffect(() => {
+      const observer = new IntersectionObserver(handleIntersection, {
+        threshold: 0.5,
+        ...option,
+      });
+      if (ref.current) observer.observe(ref.current);
+      return () => observer.disconnect();
+    }, [handleIntersection]);
+    return ref;
+  };
+  ```
+
+<br/>
+
+#### 📌 context API 활용하여 Issue 목록 관리
+
+[고민 사항]
+
+**이슈들을 무한으로 불러오기 위한 page 변수를 어디서 관리할지에 대한 고민**
+
+1. Issue Context를 사용하는 컴포넌트 단(`IssueList` 페이지)에서 관리
+2. Issue Context에서 관리
+
+- 논의 결과: Issue Context에서 관리
+- 이유: page 변수는 오로지 이슈를 위해서만 존재하기 때문에, issue를 관리하는 IssueContext 에서 관리하는 게 적합하다고 판단
+
+[그 외 개선 사항]
+
+1. 이슈를 불러올 때 사용하는 page 변수는 state 대신 useRef 사용하여 불필요한 리랜더링 방지
+2. `isEndRef` 를 사용하여 더 이상 불러올 데이터가 없으면 api를 호출하지 않도록 막음
+
+<br/>
+
+#### 📌 Router 기능 : createBrowserRouter로 구현
+
+기존의 라우팅 기능보다 많은 기능들이 추가되어 있어 활용성이 높다. <br/>
+하위 컴포넌트로 데이터를 전달 가능, 경로가 많다면 가독성이 좋으며 에러컴포넌트를 따로 설정할 수 있다.<br/>
+
+1. App.tsx 에서 RouterProvider 연결
+2. router폴더 > Router.tsx에서 createBrowserRouter 사용<br/>
+   현재 '/' 메인 페이지를 사용하지 않기에 index값을 true로 설정하여 '/' 접근시 '/repos/facebook/react/issues' 경로로 이동하도록 설정<br/>
+   경로가 '/repos/:owner/:repo/issues'라면 <IssueList />를 렌더링<br/>
+   경로가 '/repos/:owner/:repo/issues/:id'라면 <IssueDetail />를 렌더링<br/>
+   router에 설정한 설정대로 지정한 url이 아닐 경우에 에러 페이지(NotFoundPage) 렌더링
+
+```ts
+import { createBrowserRouter, Navigate } from 'react-router-dom';
+import IssueDetail from '../pages/IssueDetail';
+import IssueList from '../pages/IssueList';
+import NotFoundPage from '../pages/NotFoundPage';
+import { Root } from './Root';
+
+export const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <Root />,
+    children: [
+      {
+        index: true,
+        element: <Navigate to={'/repos/facebook/react/issues'} />,
+      },
+      {
+        path: '/repos/:owner/:repo/issues',
+        element: <IssueList />,
+      },
+      {
+        path: '/repos/:owner/:repo/issues/:id',
+        element: <IssueDetail />,
+      },
+    ],
+    errorElement: <NotFoundPage />,
+  },
+]);
+```
+
+> 또한 Header text(owner/repo) 구현시,<br/>
+> 특정 레포를 선택하여 기존 하드코딩으로 구현한 것보다 확장성을 고려하여<br/>
+> Router.tsx에서 경로 설정을 '/repos/facebook/react/issues' 이렇게 만들어<br/>
+> useParams로 owner/repo를 꺼내올 수 있다.<br/>
+> Router.tsx에서 owner/repo를 바꾸기만 하면 원하는 레포의 이슈를 요청할 수 있게 만듦<br/>
+
+```ts
+//Header.tsx
+import { useParams } from 'react-router-dom';
+
+export default function Header() {
+  const { owner, repo } = useParams();
+  return (
+    <header className='header p-6 pl-16 bg-blue-500 text-white text-xl mb-5 flex items-center justify-center'>
+      <h1>
+        {owner}/{repo}
+      </h1>
+    </header>
+  );
+}
+```
 
 <br/>
