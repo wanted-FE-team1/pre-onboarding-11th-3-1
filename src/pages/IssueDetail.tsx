@@ -33,10 +33,10 @@ export default function IssueDetail() {
     <>
       {!isLoading && issue ? (
         <div className='max-w-xl m-auto'>
-          <div className='flex justify-between items-center hover:bg-slate-300 p-3 pb-7 border-b-2 rounded-lg drop-shadow-lg'>
-            <div className='w-14 h-14 rounded-lg overflow-hidden mr-4'>
+          <div className='flex items-center justify-between p-3 border-b-2 rounded-lg hover:bg-slate-300 pb-7 drop-shadow-lg'>
+            <div className='mr-4 overflow-hidden rounded-lg w-14 h-14'>
               <img
-                className='w-full h-full object-cover'
+                className='object-cover w-full h-full'
                 src={issue.user?.avatar_url}
                 alt='깃헙 프로필 이미지'
               />
@@ -45,17 +45,24 @@ export default function IssueDetail() {
               <h2 className='text-lg'>
                 #{issue.number}&nbsp;{issue.title}
               </h2>
-              <p className='text-sm pt-2'>
+              <p className='pt-2 text-sm'>
                 작성자: {issue.user?.login}&nbsp; 작성일:{' '}
                 {convertDate(issue.created_at)}
               </p>
             </div>
-            <p className='whitespace-nowrap p-2 font-medium rounded-full'>
+            <p className='p-2 font-medium rounded-full whitespace-nowrap'>
               코멘트: {issue.comments}
             </p>
           </div>
           <div className='p-3 pt-7'>
-            {issue.body && <MarkdownPreview source={issue.body} />}
+            {issue.body && (
+              <MarkdownPreview
+                source={issue.body}
+                wrapperElement={{
+                  'data-color-mode': 'light',
+                }}
+              />
+            )}
           </div>
         </div>
       ) : (
