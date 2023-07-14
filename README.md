@@ -90,10 +90,11 @@ REACT_APP_ACCESS_TOKEN={깃허브 토큰}
   ├── 📄index.tsx
   ├── 📄App.tsx
   ├── 📂apis
-  ├── 📂contxts
+  ├── 📂contexts
   ├── 📂components
   ├── 📂hooks
   ├── 📂pages
+  ├── 📂utils
   └── 📂router
 ```
 
