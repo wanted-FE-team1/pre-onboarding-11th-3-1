@@ -3,9 +3,11 @@ import { Link } from 'react-router-dom';
 import { IssueContext } from '../contexts/IssueContext';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { useIntersectionObserver } from '../hooks/useIntersectionObserver';
+import Error from '../components/common/Error';
 
 export default function IssueList() {
-  const { issues, getInfiniteIssues, isLoading } = useContext(IssueContext);
+  const { issues, getInfiniteIssues, isLoading, isError } =
+    useContext(IssueContext);
 
   const handleIntersection = () => {
     if (!isLoading) {
@@ -47,7 +49,7 @@ export default function IssueList() {
           </div>
         ))}
         {isLoading && <LoadingSpinner />}
-        <li ref={ref}></li>
+        {isError ? <Error /> : <li ref={ref}></li>}
       </ul>
     </div>
   );
