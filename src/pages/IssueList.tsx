@@ -1,8 +1,9 @@
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { IssueContext } from '../contexts/IssueContext';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { useIntersectionObserver } from '../hooks/useIntersectionObserver';
+import Error from '../components/common/Error';
 
 export default function IssueList() {
   const { issues, getInfiniteIssues, isLoading, isError } =
@@ -16,13 +17,11 @@ export default function IssueList() {
 
   const ref = useIntersectionObserver({ callback: handleIntersection });
 
-  if (isError) return <div>에러</div>;
-
   return (
     <div className='max-w-xl m-auto'>
       <ul>
         {issues?.map((issue, index) => (
-          <div key={issue.id}>
+          <div key={issue.id + index}>
             <li className='border-solid border-b-2 border-gray-200 '>
               <Link
                 to={`/issue/${issue.id}`}
@@ -50,7 +49,7 @@ export default function IssueList() {
           </div>
         ))}
         {isLoading && <LoadingSpinner />}
-        <li ref={ref}></li>
+        {isError ? <Error /> : <li ref={ref}></li>}
       </ul>
     </div>
   );
