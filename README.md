@@ -58,10 +58,18 @@
 
 ## ⚙️ 실행 방법
 
+**설치 및 실행**
 ```
 $ npm install
 $ npm start
 ```
+
+**환경변수** <br/>
+루트 경로에 .env.local 파일 생성 후 아래 코드 추가 
+```env
+REACT_APP_ACCESS_TOKEN={깃허브 토큰}
+```
+
 <br/>
 
 ## 🤝 팀 규칙 
@@ -97,6 +105,8 @@ $ npm start
 <br/>
 
 ## 📖 서비스 소개 
+특정 깃허브 레파지토리의 이슈 목록과 상세 내용을 조회할 수 있는 웹 사이트 구축 
+
 ### 기능 구현 
 - 이슈 리스트 조회
 - 개별 이슈 조회
@@ -137,6 +147,33 @@ $ npm start
 ### 구현사항 
 ---
 <!-- 구현 사항 설명 --> 
+
+#### 📌 API 
+**axios instance**
+- baseURL 지정
+- header에 모든 요청 시 공통으로 들어가는 Accept, Authorization(토큰) 지정
+
+**특정 저장소의 이슈 데이터를 요청하는 api class**
+- private 키워드: path, query의 외부 접근을 막기위해 private 키워드 설정
+- getIssueList: 이슈 목록을 요청하는 메소드
+- getIssue: 단일 이슈를 요청하는 메소드
+
+**sort type**
+- 기존 코드는 sort 옵션 중 하나인 `comments`를 `QUERY_SORT_TYPE`에 할당해서 사용하고 있음
+- sort 옵션은 `created`, `updated`, `comments` 총 3가지가 있는데, 이 외에 다른 문자열이 할당되면 오류가 발생할 수 있음. 그래서 기존의 string 타입보다 더 구체적인 리터럴 타입을 지정해 오류를 방지함
+
+```ts
+type SortType = 'created' | 'updated' | 'comments';
+
+export class RepositoryAPI {
+  private static QUERY_SORT_TYPE: SortType = 'comments';
+
+  // code...
+}
+```
+
+<br/>
+
 #### 📌 IssueList 컴포넌트
 1. 관심사를 분리하여 컴포넌트의 가독성과 유지 보수성을 향상
 - 이슈 데이터 및 상태 관리는 IssueContext로 분리되어 관심사 분리 
