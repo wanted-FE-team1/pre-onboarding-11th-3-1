@@ -241,3 +241,65 @@ export class RepositoryAPI {
 
 1. 이슈를 불러올 때 사용하는 page 변수는 state 대신 useRef 사용하여 불필요한 리랜더링 방지
 2. `isEndRef` 를 사용하여 더 이상 불러올 데이터가 없으면 api를 호출하지 않도록 막음
+   
+<br/>
+
+#### 📌 Router 기능 : createBrowserRouter로 구현
+기존의 라우팅 기능보다 많은 기능들이 추가되어 있어 활용성이 높다. <br/>
+하위 컴포넌트로 데이터를 전달 가능, 경로가 많다면 가독성이 좋으며 에러컴포넌트를 따로 설정할 수 있다.<br/>
+
+1. App.tsx 에서 RouterProvider 연결
+2. router폴더 > Router.tsx에서 createBrowserRouter 사용<br/>
+현재 '/' 메인 페이지를 사용하지 않기에 index값을 true로 설정하여 '/' 접근시 '/repos/facebook/react/issues' 경로로 이동하도록 설정<br/>
+경로가 '/repos/:owner/:repo/issues'라면  <IssueList />를 렌더링<br/>
+경로가 '/repos/:owner/:repo/issues/:id'라면  <IssueDetail />를 렌더링<br/>
+router에 설정한 설정대로 지정한 url이 아닐 경우에 에러 페이지(NotFoundPage) 렌더링
+```ts
+import { createBrowserRouter, Navigate } from 'react-router-dom';
+import IssueDetail from '../pages/IssueDetail';
+import IssueList from '../pages/IssueList';
+import NotFoundPage from '../pages/NotFoundPage';
+import { Root } from './Root';
+
+export const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <Root />,
+    children: [
+      {
+        index: true,
+        element: <Navigate to={'/repos/facebook/react/issues'} />,
+      },
+      {
+        path: '/repos/:owner/:repo/issues',
+        element: <IssueList />,
+      },
+      {
+        path: '/repos/:owner/:repo/issues/:id',
+        element: <IssueDetail />,
+      },
+    ],
+    errorElement: <NotFoundPage />,
+  },
+]);
+```
+>또한 Header text(owner/repo) 구현시,<br/>
+특정 레포를 선택하여 기존 하드코딩으로 구현한 것보다 확장성을 고려하여<br/>
+Router.tsx에서 경로 설정을 '/repos/facebook/react/issues' 이렇게 만들어<br/>
+useParams로 owner/repo를 꺼내올 수 있다.<br/>
+Router.tsx에서 owner/repo를 바꾸기만 하면 원하는 레포의 이슈를 요청할 수 있게 만듦<br/>
+```ts
+//Header.tsx
+import { useParams } from 'react-router-dom';
+
+export default function Header() {
+  const {owner, repo} = useParams();
+  return (
+    <header className='header p-6 pl-16 bg-blue-500 text-white text-xl mb-5 flex items-center justify-center'>
+      <h1>{owner}/{repo}</h1>
+    </header>
+  );
+}
+```
+
+<br/>
