@@ -17,12 +17,10 @@ export const router = createBrowserRouter([
       {
         path: '/repos/:owner/:repo/issues',
         element: <IssueList />,
-        children: [
-          {
-            path: '/repos/:owner/:repo/issues/:id',
-            element: <IssueDetail />,
-          },
-        ],
+      },
+      {
+        path: '/repos/:owner/:repo/issues/:id',
+        element: <IssueDetail />,
       },
     ],
     errorElement: <NotFoundPage />,
