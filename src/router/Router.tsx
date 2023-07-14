@@ -1,7 +1,4 @@
-import {
-  createBrowserRouter,
-  Navigate,
-} from 'react-router-dom';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
 
 import IssueDetail from '../pages/IssueDetail';
 import IssueList from '../pages/IssueList';

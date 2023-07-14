@@ -1,12 +1,11 @@
 import React, { createContext, useRef, useState } from 'react';
-import { getIssuesApi, listReposIssueResponse } from '../apis/issues';
+import { RepositoryAPI, IssueListResponseType } from '../apis/issues';
 
 interface IssueContextType {
-  issues: listReposIssueResponse['data'];
+  issues: IssueListResponseType['data'];
   isLoading: boolean;
   isError: boolean;
   getInfiniteIssues: () => void;
-  getIssue: (id: number) => listReposIssueResponse['data'][number];
 }
 
 const defaultVlaue: IssueContextType = {
@@ -14,9 +13,6 @@ const defaultVlaue: IssueContextType = {
   isLoading: false,
   isError: false,
   getInfiniteIssues: () => {
-    throw new Error();
-  },
-  getIssue: () => {
     throw new Error();
   },
 };
@@ -28,7 +24,7 @@ interface IssueContextProviderProps {
 export const IssueContext = createContext<IssueContextType>(defaultVlaue);
 
 export function IssueContextProvider({ children }: IssueContextProviderProps) {
-  const [issues, setIssues] = useState<listReposIssueResponse['data']>([]);
+  const [issues, setIssues] = useState<IssueListResponseType['data']>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
 
@@ -39,10 +35,8 @@ export function IssueContextProvider({ children }: IssueContextProviderProps) {
     if (isEndRef.current) return;
 
     setIsLoading(true);
-
     try {
-      const response = await getIssuesApi(pageRef.current);
-
+      const response = await RepositoryAPI.getIssueList(pageRef.current);
       if (response.length === 0) {
         isEndRef.current = true;
         return;
@@ -57,17 +51,9 @@ export function IssueContextProvider({ children }: IssueContextProviderProps) {
     }
   };
 
-  const getIssue = (id: number) => {
-    const issue = issues.find((issue) => issue.id === id);
-    if (!issue) {
-      throw new Error('id에 해당하는 issue가 없습니다 ');
-    }
-    return issue;
-  };
-
   return (
     <IssueContext.Provider
-      value={{ issues, isLoading, getInfiniteIssues, getIssue, isError }}
+      value={{ issues, isLoading, getInfiniteIssues, isError }}
     >
       {children}
     </IssueContext.Provider>
